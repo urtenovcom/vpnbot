@@ -52,7 +52,8 @@ def cancel_keyboard():
         [KeyboardButton(text=BTN_CANCEL)]
     ], resize_keyboard=True)
 
-[dp.message](workspace://dp.message)(Command("start"))
+
+@dp.message(Command("start"))
 async def cmd_start(message: Message, state: FSMContext):
     await state.clear()
     user_id = message.from_user.id
@@ -61,7 +62,7 @@ async def cmd_start(message: Message, state: FSMContext):
         await message.answer("Privet, Admin! Panel upravleniya gotova.", reply_markup=admin_keyboard())
         return
     if not username:
-        await message.answer("U tebya ne ustanovlen username v Telegram. Zaidi v Nastroyki i ustanovi ego, zatем napishi /start snova.")
+        await message.answer("U tebya ne ustanovlen username v Telegram. Zaidi v Nastroyki i ustanovi ego, zatem napishi /start snova.")
         return
     user = await db.get_user_by_username(username)
     if user:
@@ -71,14 +72,16 @@ async def cmd_start(message: Message, state: FSMContext):
     else:
         await message.answer("Tebya net v spiske. Obratisya k administratoru.")
 
-[dp.message(F.text](workspace://dp.message(F.text) == BTN_ADD_USER)
+
+@dp.message(F.text == BTN_ADD_USER)
 async def admin_add_user(message: Message, state: FSMContext):
     if message.from_user.id != ADMIN_ID:
         return
     await state.set_state(AdminStates.waiting_new_username)
     await message.answer("Vvedi username polzovatelya (mozhno s @ ili bez):", reply_markup=cancel_keyboard())
 
-[dp.message(AdminStates.waiting_new_username](workspace://dp.message(AdminStates.waiting_new_username))
+
+@dp.message(AdminStates.waiting_new_username)
 async def process_new_username(message: Message, state: FSMContext):
     if message.text == BTN_CANCEL:
         await state.clear()
@@ -93,7 +96,8 @@ async def process_new_username(message: Message, state: FSMContext):
         await message.answer(f"Polzovatel @{username} dobavlen!", reply_markup=admin_keyboard())
     await state.clear()
 
-[dp.message(F.text](workspace://dp.message(F.text) == BTN_SELECT_USER)
+
+@dp.message(F.text == BTN_SELECT_USER)
 async def admin_select_user(message: Message):
     if message.from_user.id != ADMIN_ID:
         return
@@ -109,7 +113,8 @@ async def admin_select_user(message: Message):
     kb = InlineKeyboardMarkup(inline_keyboard=buttons)
     await message.answer("Vyberi polzovatelya:", reply_markup=kb)
 
-[dp.callback_query(F.data.startswith](workspace://dp.callback_query(F.data.startswith)("select_user:"))
+
+@dp.callback_query(F.data.startswith("select_user:"))
 async def user_selected(call: CallbackQuery, state: FSMContext):
     if call.from_user.id != ADMIN_ID:
         return
@@ -119,7 +124,8 @@ async def user_selected(call: CallbackQuery, state: FSMContext):
     await call.message.answer(f"Vybran: @{uname}\n\nOtprav klyuchi - kazhdiy s novoy stroki.\nStarye klyuchi budut zameneny.", reply_markup=cancel_keyboard())
     await call.answer()
 
-[dp.message(AdminStates.waiting_keys](workspace://dp.message(AdminStates.waiting_keys))
+
+@dp.message(AdminStates.waiting_keys)
 async def process_keys(message: Message, state: FSMContext):
     if message.text == BTN_CANCEL:
         await state.clear()
@@ -141,14 +147,16 @@ async def process_keys(message: Message, state: FSMContext):
             pass
     await state.clear()
 
-[dp.message(F.text](workspace://dp.message(F.text) == BTN_NOTIFY)
+
+@dp.message(F.text == BTN_NOTIFY)
 async def admin_notification(message: Message, state: FSMContext):
     if message.from_user.id != ADMIN_ID:
         return
     await state.set_state(AdminStates.waiting_notification)
     await message.answer("Napishi tekst opoveshenia. Bot razoshlet ego vsem polzovatelyam:", reply_markup=cancel_keyboard())
 
-[dp.message(AdminStates.waiting_notification](workspace://dp.message(AdminStates.waiting_notification))
+
+@dp.message(AdminStates.waiting_notification)
 async def process_notification(message: Message, state: FSMContext):
     if message.text == BTN_CANCEL:
         await state.clear()
@@ -168,14 +176,16 @@ async def process_notification(message: Message, state: FSMContext):
     await message.answer(f"Otpravleno: {sent} chel.\nNe dostavleno: {failed} chel.", reply_markup=admin_keyboard())
     await state.clear()
 
-[dp.message(F.text](workspace://dp.message(F.text) == BTN_INSTRUCTIONS)
+
+@dp.message(F.text == BTN_INSTRUCTIONS)
 async def admin_instructions(message: Message, state: FSMContext):
     if message.from_user.id != ADMIN_ID:
         return
     await state.set_state(AdminStates.waiting_instructions)
     await message.answer("Vvedi tekst instrukciy. Polzovateli uvydyat ego v razdele Vazhno:", reply_markup=cancel_keyboard())
 
-[dp.message(AdminStates.waiting_instructions](workspace://dp.message(AdminStates.waiting_instructions))
+
+@dp.message(AdminStates.waiting_instructions)
 async def process_instructions(message: Message, state: FSMContext):
     if message.text == BTN_CANCEL:
         await state.clear()
@@ -185,7 +195,8 @@ async def process_instructions(message: Message, state: FSMContext):
     await message.answer("Instrukcii sohraneny!", reply_markup=admin_keyboard())
     await state.clear()
 
-[dp.message(F.text](workspace://dp.message(F.text) == BTN_DELETE_USER)
+
+@dp.message(F.text == BTN_DELETE_USER)
 async def admin_delete_user(message: Message):
     if message.from_user.id != ADMIN_ID:
         return
@@ -200,7 +211,8 @@ async def admin_delete_user(message: Message):
     kb = InlineKeyboardMarkup(inline_keyboard=buttons)
     await message.answer("Kogo udalit?", reply_markup=kb)
 
-[dp.callback_query(F.data.startswith](workspace://dp.callback_query(F.data.startswith)("delete_user:"))
+
+@dp.callback_query(F.data.startswith("delete_user:"))
 async def confirm_delete(call: CallbackQuery):
     if call.from_user.id != ADMIN_ID:
         return
@@ -209,7 +221,8 @@ async def confirm_delete(call: CallbackQuery):
     await call.message.answer(f"Polzovatel @{uname} udalen.", reply_markup=admin_keyboard())
     await call.answer()
 
-[dp.message(F.text](workspace://dp.message(F.text) == BTN_MY_KEYS)
+
+@dp.message(F.text == BTN_MY_KEYS)
 async def user_keys(message: Message):
     if message.from_user.id == ADMIN_ID:
         return
@@ -229,7 +242,8 @@ async def user_keys(message: Message):
         update_str = f"\n\nPoslednee obnovlenie: {dt.strftime('%d.%m.%Y v %H:%M')}"
     await message.answer(f"Tvoi VPN-klyuchi:\n\n{keys_text}{update_str}", parse_mode="Markdown")
 
-[dp.message(F.text](workspace://dp.message(F.text) == BTN_IMPORTANT)
+
+@dp.message(F.text == BTN_IMPORTANT)
 async def user_important(message: Message):
     if message.from_user.id == ADMIN_ID:
         return
@@ -240,6 +254,7 @@ async def user_important(message: Message):
     text, updated_at = result
     dt = datetime.datetime.fromisoformat(updated_at)
     await message.answer(f"Vazhnaya informaciya:\n\n{text}\n\nObnovleno: {dt.strftime('%d.%m.%Y v %H:%M')}")
+
 
 async def main():
     await db.init_db()
