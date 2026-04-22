@@ -136,7 +136,7 @@ async def process_keys(message: Message, state: FSMContext):
     username = data["selected_username"]
     raw_keys = [k.strip() for k in message.text.strip().split("\n") if k.strip()]
     await db.add_keys(user_id, raw_keys)
-    keys_text = "\n\n".join([f"`{k}`" for k in raw_keys])
+    keys_text = "\n\n".join([f"```{k}```" for k in raw_keys])
     await message.answer(f"Ключи для @{username} сохранены:\n\n{keys_text}", reply_markup=admin_keyboard(), parse_mode="Markdown")
     user = await db.get_user_by_username(username)
     if user and user[1]:
