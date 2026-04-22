@@ -136,8 +136,8 @@ async def process_keys(message: Message, state: FSMContext):
     username = data["selected_username"]
     raw_keys = [k.strip() for k in message.text.strip().split("\n") if k.strip()]
     await db.add_keys(user_id, raw_keys)
-    keys_text = "\n\n".join([f"```{k}```" for k in raw_keys])
-    await message.answer(f"Ключи для @{username} сохранены:\n\n{keys_text}", reply_markup=admin_keyboard(), parse_mode="Markdown")
+    keys_text = "\n\n".join([f"<code>{k}</code>" for k in raw_keys])
+    await message.answer(f"Ключи для @{username} сохранены:\n\n{keys_text}", reply_markup=admin_keyboard(), parse_mode="HTML")
     user = await db.get_user_by_username(username)
     if user and user[1]:
         try:
@@ -235,12 +235,12 @@ async def user_keys(message: Message):
     if not keys:
         await message.answer("У тебя пока нет ключей. Ожидай от администратора.")
         return
-    keys_text = "\n\n".join([f"`{k[0]}`" for k in keys])
+    keys_text = "\n\n".join([f"<code>{k[0]}</code>" for k in keys])
     update_str = ""
     if last_update:
         dt = datetime.datetime.fromisoformat(last_update)
         update_str = f"\n\nПоследнее обновление: {dt.strftime('%d.%m.%Y в %H:%M')}"
-    await message.answer(f"Твои VPN-ключи:\n\n{keys_text}{update_str}", parse_mode="Markdown")
+    await message.answer(f"Твои VPN-ключи:\n\n{keys_text}{update_str}", parse_mode="HTML")
 
 
 @dp.message(F.text == BTN_IMPORTANT)
